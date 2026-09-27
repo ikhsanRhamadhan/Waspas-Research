@@ -1,3 +1,4 @@
+import { PARAM_FOKUS_PENGAJUAN, ROUTE_PENGAJUAN } from '@spk-bansos/shared';
 import { desc, eq } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -124,6 +125,28 @@ describe('Alur lengkap SPK Bansos', () => {
     // Kandidat paling needy (1.100.000, 6 tanggungan, tidak layak) harus mendominasi.
     expect(ranking[0]!.skorAkhir).toBeGreaterThan(ranking[1]!.skorAkhir);
 
+    // Di titik ini masih ada pengajuan yang SUDAH dihitung WASPAS tapi belum diputuskan.
+    // Kode lama menghitung "sudah dihitung" hanya dari yang BELUM diputuskan, sehingga
+    // rasionya memakai pembagi yang salah. Assertion di sini sengaja menguji rumus terhadap
+    // yang sudah diputuskan, karena di titik ini kedua pembagi itu memang berbeda nilainya.
+    const statistikSebelum = await request(app)
+      .get('/api/admin/statistik')
+      .set('Authorization', `Bearer ${tokenAdmin}`);
+    expect(statistikSebelum.status, JSON.stringify(statistikSebelum.body)).toBe(200);
+
+    const sebelum = statistikSebelum.body.data as {
+      totalDiputuskan: number;
+      totalDiterima: number;
+      totalSudahDihitung: number;
+      rasioPenerima: number | null;
+    };
+    // Prasyarat: tanpa selisih ini test tidak bisa membedakan pembagi lama dan baru.
+    expect(sebelum.totalSudahDihitung, JSON.stringify(statistikSebelum.body)).toBeGreaterThan(
+      sebelum.totalDiputuskan,
+    );
+    expect(sebelum.rasioPenerima, `rasio tidak boleh null: ${JSON.stringify(statistikSebelum.body)}`).not.toBeNull();
+    expect(sebelum.rasioPenerima).toBe(Math.round((sebelum.totalDiterima / sebelum.totalDiputuskan) * 10_000) / 100);
+
     const tetapkan = await request(app)
       .post('/api/admin/penerima/tetapkan')
       .set('Authorization', `Bearer ${tokenAdmin}`)
@@ -134,7 +157,24 @@ describe('Alur lengkap SPK Bansos', () => {
         ],
       });
     expect(tetapkan.status, JSON.stringify(tetapkan.body)).toBe(200);
-    expect(tetapkan.body.data.jumlahDitetapkan).toBe(2);
+    expect(tetapkan.body.data.jumlahDitetapkan, JSON.stringify(tetapkan.body)).toBe(2);
+
+    // Setelah semua diputuskan, funnel harus tetap konsisten dan rasionya tidak meledak.
+    const statistik = await request(app)
+      .get('/api/admin/statistik')
+      .set('Authorization', `Bearer ${tokenAdmin}`);
+    expect(statistik.status, JSON.stringify(statistik.body)).toBe(200);
+
+    const sesudah = statistik.body.data as {
+      totalDiputuskan: number;
+      totalSudahDihitung: number;
+      rasioPenerima: number | null;
+    };
+    expect(sesudah.totalDiputuskan).toBeGreaterThan(0);
+    // Funnel harus monoton: tidak boleh ada tahap lebih besar dari tahap setelahnya.
+    expect(sesudah.totalSudahDihitung).toBeGreaterThanOrEqual(sesudah.totalDiputuskan);
+    expect(sesudah.rasioPenerima).not.toBeNull();
+    expect(sesudah.rasioPenerima).toBeLessThanOrEqual(100);
   });
 
   it('warga melihat hasil dan notifikasi keputusannya', async () => {
@@ -151,6 +191,14 @@ describe('Alur lengkap SPK Bansos', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(notifikasi.status).toBe(200);
     expect(notifikasi.body.data.items.length).toBeGreaterThan(0);
+
+    // Tautan notifikasi akan dipakai React Router, bukan dikirim ke Express. Kalau
+    // isinya path API, user diarahkan ke URL yang tidak punya route di frontend.
+    const bertautan = notifikasi.body.data.items.filter((item: { actionUrl: string | null }) => item.actionUrl);
+    expect(bertautan.length, 'notifikasi keputusan harus punya tautan').toBeGreaterThan(0);
+    for (const item of bertautan) {
+      expect(item.actionUrl.startsWith(`${ROUTE_PENGAJUAN}?${PARAM_FOKUS_PENGAJUAN}=`)).toBe(true);
+    }
 
     const detail = await request(app)
       .get('/api/penduduk/status')

@@ -24,6 +24,8 @@ export interface StatistikAdmin {
   terverifikasi: number;
   totalDiterima: number;
   totalSudahDihitung: number;
+  /** Pengajuan yang sudah mendapat keputusan admin, apa pun hasilnya. */
+  totalDiputuskan: number;
   rasioPenerima: number | null;
 }
 
@@ -139,7 +141,7 @@ const selectPenerima = {
 
 export class DrizzleAdminRepository implements AdminRepository {
   async statistik(): Promise<StatistikAdmin> {
-    const [jumlahPenduduk, jumlahPengajuan, menunggu, terverifikasi, diterima, sudahDihitung] =
+    const [jumlahPenduduk, jumlahPengajuan, menunggu, terverifikasi, sudahDihitung, sudahDiputuskan, diterima] =
       await Promise.all([
         db.select({ value: count() }).from(penduduk).where(isNull(penduduk.deletedAt)),
         db.select({ value: count() }).from(pengajuan).where(isNull(pengajuan.deletedAt)),
@@ -151,16 +153,14 @@ export class DrizzleAdminRepository implements AdminRepository {
           .select({ value: count() })
           .from(pengajuan)
           .where(and(eq(pengajuan.statusPengajuan, 'data_terverifikasi'), isNull(pengajuan.deletedAt))),
+        db.select({ value: countDistinct(perhitunganWaspas.pengajuanId) }).from(perhitunganWaspas),
+        db.select({ value: count() }).from(hasil),
         db.select({ value: count() }).from(hasil).where(eq(hasil.statusKeputusan, 'diterima')),
-        db
-          .select({ value: countDistinct(perhitunganWaspas.pengajuanId) })
-          .from(perhitunganWaspas)
-          .leftJoin(hasil, eq(hasil.pengajuanId, perhitunganWaspas.pengajuanId))
-          .where(isNull(hasil.id)),
       ]);
 
-    const totalDiterima = diterima[0]?.value ?? 0;
     const totalSudahDihitung = sudahDihitung[0]?.value ?? 0;
+    const totalDiputuskan = sudahDiputuskan[0]?.value ?? 0;
+    const totalDiterima = diterima[0]?.value ?? 0;
 
     return {
       totalPenduduk: jumlahPenduduk[0]?.value ?? 0,
@@ -169,10 +169,9 @@ export class DrizzleAdminRepository implements AdminRepository {
       terverifikasi: terverifikasi[0]?.value ?? 0,
       totalDiterima,
       totalSudahDihitung,
+      totalDiputuskan,
       rasioPenerima:
-        totalSudahDihitung > 0
-          ? Math.round((totalDiterima / totalSudahDihitung) * 10_000) / 100
-          : null,
+        totalDiputuskan > 0 ? Math.round((totalDiterima / totalDiputuskan) * 10_000) / 100 : null,
     };
   }
 

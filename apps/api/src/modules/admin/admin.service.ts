@@ -1,4 +1,4 @@
-import { LAMBDA_DEFAULT } from '@spk-bansos/shared';
+import { LAMBDA_DEFAULT, tautanPengajuan } from '@spk-bansos/shared';
 import type { Request } from 'express';
 
 import { hitungSemua } from '../../domain/waspas/waspas.service';
@@ -184,7 +184,7 @@ export const tetapkanKeputusan = async (req: Request, input: TetapkanInput) => {
                 ? 'Anda diprioritaskan sebagai cadangan dan akan dihubungi bila ada penerima yang mundur.'
                 : 'Mohon maaf, pengajuan Anda tidak dapat dilanjutkan.'),
           type: item.statusKeputusan === 'diterima' ? 'success' : 'info',
-          actionUrl: `/penduduk/pengajuan/${item.pengajuanId}`,
+          actionUrl: tautanPengajuan(item.pengajuanId),
         };
       }),
   );

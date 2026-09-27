@@ -1,5 +1,5 @@
-import { ROLE_LABEL } from '@spk-bansos/shared';
-import { Bell, ClipboardCheck, FileText, Gauge, History, Home, LogOut, Menu, Moon, Scale, Settings2, Sun, Users, X } from 'lucide-react';
+import { ROLE_LABEL, type UserRole } from '@spk-bansos/shared';
+import { Bell, BookOpen, ClipboardCheck, FileText, Gauge, GitBranch, History, Home, LogOut, Menu, Moon, Scale, Settings2, Sun, Users, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
@@ -17,19 +17,30 @@ interface ItemMenu {
 }
 
 /**
+ * Halaman ini terbuka untuk semua role, jadi didefinisikan sekali lalu disisipkan ke
+ * setiap daftar menu. Menyalin entry-nya per role mudah membuat satu role lupa diubah.
+ */
+const MENU_BERSAMA: readonly ItemMenu[] = [
+  { ke: '/panduan', label: 'Panduan', icon: BookOpen },
+  { ke: '/alur', label: 'Alur', icon: GitBranch },
+];
+
+/**
  * Menu per role. Admin tidak melihat menu petugas dan sebaliknya: endpoint sudah
  * menolak, jadi menampilkan pintasan yang pasti gagal hanya menambah frustrasi.
  */
-const MENU: Record<'penduduk' | 'petugas' | 'admin', readonly ItemMenu[]> = {
+const MENU: Record<UserRole, readonly ItemMenu[]> = {
   penduduk: [
     { ke: '/dashboard', label: 'Status bantuan', icon: Home, end: true },
     { ke: '/pengajuan', label: 'Pengajuan', icon: FileText },
     { ke: '/ranking', label: 'Peringkat', icon: Scale },
+    ...MENU_BERSAMA,
     { ke: '/profil', label: 'Data diri', icon: Users },
   ],
   petugas: [
     { ke: '/petugas', label: 'Antrean verifikasi', icon: ClipboardCheck, end: true },
     { ke: '/petugas/laporan', label: 'Laporan harian', icon: FileText },
+    ...MENU_BERSAMA,
   ],
   admin: [
     { ke: '/admin', label: 'Statistik desa', icon: Home, end: true },
@@ -37,6 +48,7 @@ const MENU: Record<'penduduk' | 'petugas' | 'admin', readonly ItemMenu[]> = {
     { ke: '/admin/penerima', label: 'Penerima dan keputusan', icon: Scale },
     { ke: '/admin/kriteria', label: 'Kriteria dan bobot', icon: Settings2 },
     { ke: '/admin/audit', label: 'Jejak audit', icon: History },
+    ...MENU_BERSAMA,
   ],
 };
 
@@ -126,7 +138,7 @@ export const AppShell = () => {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform lg:static lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900',
+          'fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform lg:sticky lg:top-0 lg:h-screen lg:self-start lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900',
           'shadow-lg lg:shadow-none',
           menuTerbuka ? 'translate-x-0' : '-translate-x-full',
         )}

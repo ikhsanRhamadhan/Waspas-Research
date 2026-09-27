@@ -9,10 +9,13 @@ import { useData } from '../../lib/useData';
 import type { Kriteria, RingkasanBobot, StatistikAdmin } from '../../types';
 
 const Tahapan = ({ statistik }: { statistik: StatistikAdmin }) => {
+  // Urutan tahap harus monoton naik. "Sudah dihitung" dulu-dulu dihitung hanya yang
+  // belum diputuskan, sehingga angkanya justru turun begitu keputusan ditetapkan.
   const tahap = [
     { label: 'Menunggu verifikasi', nilai: statistik.menungguVerifikasi, ke: '/petugas/dashboard' },
     { label: 'Sudah diverifikasi', nilai: statistik.terverifikasi, ke: '/admin/waspas' },
     { label: 'Sudah dihitung WASPAS', nilai: statistik.totalSudahDihitung, ke: '/admin/penerima' },
+    { label: 'Sudah ditetapkan', nilai: statistik.totalDiputuskan, ke: '/admin/penerima' },
     { label: 'Ditetapkan diterima', nilai: statistik.totalDiterima, ke: '/admin/penerima' },
   ];
   const puncak = Math.max(...tahap.map((item) => item.nilai), 1);
@@ -91,8 +94,9 @@ export const AdminDashboardPage = () => {
               <CardBody>
                 {statistik.data ? <Tahapan statistik={statistik.data} /> : null}
                 <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
-                  Rasio penerima terhadap pengajuan terverifikasi:{' '}
-                  {formatPercent(statistik.data?.rasioPenerima ?? 0)}
+                  {statistik.data && statistik.data.totalDiputuskan > 0
+                    ? `Rasio penerima dari ${statistik.data.totalDiputuskan} pengajuan yang sudah ditetapkan: ${formatPercent(statistik.data.rasioPenerima ?? 0)}`
+                    : 'Rasio penerima muncul setelah ada keputusan yang ditetapkan.'}
                 </p>
               </CardBody>
             </Card>

@@ -1,5 +1,6 @@
 import {
   KONDISI_RUMAH_LABEL,
+  PARAM_FOKUS_PENGAJUAN,
   STATUS_PENGAJUAN,
   STATUS_PENGAJUAN_BISA_EDIT,
   STATUS_PENGAJUAN_LABEL,
@@ -7,9 +8,10 @@ import {
   formatTanggal,
 } from '@spk-bansos/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 
 import { StatusPengajuanBadge } from '../../components/ui/Badge';
@@ -146,6 +148,17 @@ export const PengajuanPage = () => {
   const [status, setStatus] = useState('');
   const [formTerbuka, setFormTerbuka] = useState(false);
   const [idDiubah, setIdDiubah] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const fokus = searchParams.get(PARAM_FOKUS_PENGAJUAN);
+
+  // Notifikasi keputusan dan verifikasi menunjuk pengajuan tertentu lewat ?fokus=.
+  // Rinciannya diambil langsung per id, jadi pengajuan itu tetap terbuka walaupun
+  // berada di halaman lain atau tersaring filter status.
+  useEffect(() => {
+    if (!fokus) return;
+    setIdDiubah(fokus);
+    setFormTerbuka(true);
+  }, [fokus]);
 
   const daftar = useData(
     () =>
@@ -165,6 +178,15 @@ export const PengajuanPage = () => {
   const tutupForm = () => {
     setFormTerbuka(false);
     setIdDiubah(null);
+    // Param dibersihkan dengan replace supaya tidak masuk riwayat browser. Kalau
+    // dibiarkan, memuat ulang halaman akan membuka lagi form yang baru saja ditutup.
+    setSearchParams(
+      (params) => {
+        params.delete(PARAM_FOKUS_PENGAJUAN);
+        return params;
+      },
+      { replace: true },
+    );
   };
 
   const kolom: Kolom<RingkasanPengajuan>[] = [

@@ -9,10 +9,12 @@ import { AuditLogPage } from './pages/admin/AuditLogPage';
 import { KriteriaPage } from './pages/admin/KriteriaPage';
 import { PenerimaPage } from './pages/admin/PenerimaPage';
 import { WaspasPage } from './pages/admin/WaspasPage';
+import { AlurPage } from './pages/AlurPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { NotifikasiPage } from './pages/NotifikasiPage';
+import { PanduanPage } from './pages/PanduanPage';
 import { DashboardPage } from './pages/penduduk/DashboardPage';
 import { PengajuanPage } from './pages/penduduk/PengajuanPage';
 import { ProfilPage } from './pages/penduduk/ProfilPage';
@@ -43,6 +45,8 @@ export const App = () => {
         <Route element={<RequireAuth />}>
           <Route element={<AppShell />}>
             <Route path="/notifikasi" element={<NotifikasiPage />} />
+            <Route path="/panduan" element={<PanduanPage />} />
+            <Route path="/alur" element={<AlurPage />} />
 
             <Route element={<RequireRole role="penduduk" />}>
               <Route path="/dashboard" element={<DashboardPage />} />

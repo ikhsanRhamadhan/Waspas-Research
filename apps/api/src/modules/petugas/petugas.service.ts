@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import { stat } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 
-import type { Paginated } from '@spk-bansos/shared';
+import { tautanPengajuan, type Paginated } from '@spk-bansos/shared';
 import type { Request } from 'express';
 
 import { env } from '../../config/env';
@@ -111,7 +111,7 @@ export const verifikasi = async (
         ? 'Pengajuan bantuan sosial Anda telah diverifikasi petugas dan dilanjutkan ke tahap perhitungan WASPAS.'
         : input.catatanVerifikasi ?? 'Silakan perbaiki data pengajuan Anda lalu kirim ulang.',
       type: valid ? 'success' : 'warning',
-      actionUrl: `/penduduk/pengajuan/${pengajuanId}`,
+      actionUrl: tautanPengajuan(pengajuanId),
     });
   }
 

@@ -175,6 +175,7 @@ export interface StatistikAdmin {
   terverifikasi: number;
   totalDiterima: number;
   totalSudahDihitung: number;
+  totalDiputuskan: number;
   rasioPenerima: number | null;
 }
 

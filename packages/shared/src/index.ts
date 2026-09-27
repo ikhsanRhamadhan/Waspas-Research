@@ -1,6 +1,7 @@
 export * from './constants/role';
 export * from './constants/status';
 export * from './constants/labels';
+export * from './constants/navigation';
 export * from './types/api';
 export * from './types/waspas';
 export * from './validation/common';

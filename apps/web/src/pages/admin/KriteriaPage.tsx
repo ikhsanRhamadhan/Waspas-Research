@@ -390,7 +390,7 @@ export const KriteriaPage = () => {
         ) : (
           <ul className="divide-y divide-slate-200 dark:divide-slate-800">
             {(daftar.data ?? []).map((item) => (
-              <li key={item.id} className="space-y-2 py-4">
+              <li key={item.id} className="space-y-2 px-5 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-slate-900 dark:text-slate-50">{item.namaKriteria}</p>

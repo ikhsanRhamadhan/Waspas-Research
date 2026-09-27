@@ -98,52 +98,57 @@ export const NotifikasiPage = () => {
           onUlangi={daftar.reload}
         >
           <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-            {(daftar.data?.items ?? []).map((item) => (
-              <li
-                key={item.id}
-                className={cn(
-                  'border-l-4 px-5 py-4',
-                  WARNA_TIPE[item.tipe],
-                  item.isRead ? 'opacity-70' : 'bg-slate-50 dark:bg-slate-900/60',
-                )}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-slate-900 dark:text-slate-50">
-                      {item.judul}
-                      {!item.isRead ? (
-                        <span className="ml-2 align-middle text-xs font-semibold text-amber-700 dark:text-amber-400">
-                          Baru
-                        </span>
+            {(daftar.data?.items ?? []).map((item) => {
+              // Ditangkap di luar callback: narrowing `item.actionUrl` tidak ikut
+              // bertahan di dalam closure async.
+              const target = item.actionUrl;
+              return (
+                <li
+                  key={item.id}
+                  className={cn(
+                    'border-l-4 px-5 py-4',
+                    WARNA_TIPE[item.tipe],
+                    item.isRead ? 'opacity-70' : 'bg-slate-50 dark:bg-slate-900/60',
+                  )}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900 dark:text-slate-50">
+                        {item.judul}
+                        {!item.isRead ? (
+                          <span className="ml-2 align-middle text-xs font-semibold text-amber-700 dark:text-amber-400">
+                            Baru
+                          </span>
+                        ) : null}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.pesan}</p>
+                      <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                        {JENIS_NOTIFIKASI_LABEL[item.tipe]} <span className="mx-1">|</span>{' '}
+                        {formatWaktuRelatif(item.dibuatPada)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      {target ? (
+                        <Button
+                          ukuran="kecil"
+                          onClick={async () => {
+                            if (!item.isRead) await tandaiDibaca(item.id);
+                            navigate(target);
+                          }}
+                        >
+                          Buka pengajuan
+                        </Button>
                       ) : null}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{item.pesan}</p>
-                    <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      {JENIS_NOTIFIKASI_LABEL[item.tipe]} <span className="mx-1">|</span>{' '}
-                      {formatWaktuRelatif(item.dibuatPada)}
-                    </p>
+                      {!item.isRead ? (
+                        <Button ukuran="kecil" varian="garis" onClick={() => tandaiDibaca(item.id)}>
+                          Tandai dibaca
+                        </Button>
+                      ) : null}
+                    </div>
                   </div>
-                  <div className="flex shrink-0 gap-2">
-                    {item.actionUrl ? (
-                      <Button
-                        ukuran="kecil"
-                        onClick={async () => {
-                          if (!item.isRead) await tandaiDibaca(item.id);
-                          navigate(item.actionUrl as string);
-                        }}
-                      >
-                        Buka pengajuan
-                      </Button>
-                    ) : null}
-                    {!item.isRead ? (
-                      <Button ukuran="kecil" varian="garis" onClick={() => tandaiDibaca(item.id)}>
-                        Tandai dibaca
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </DataState>
       </Card>
