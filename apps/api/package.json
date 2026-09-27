@@ -1,0 +1,52 @@
+{
+  "name": "@spk-bansos/api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/server.ts",
+    "build": "tsup",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed/index.ts",
+    "db:reset": "tsx src/db/reset.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@spk-bansos/shared": "*",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "jose": "^5.10.0",
+    "multer": "^2.0.2",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.16.3",
+    "pino": "^9.13.1",
+    "pino-http": "^10.5.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^22.10.2",
+    "@types/pdfkit": "^0.17.4",
+    "@types/pg": "^8.15.6",
+    "@types/supertest": "^6.0.3",
+    "drizzle-kit": "^0.31.11",
+    "supertest": "^7.1.4",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

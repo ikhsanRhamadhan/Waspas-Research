@@ -1,0 +1,3 @@
+# Baris akhir dinormalkan ke LF supaya diff, test, dan CI di Linux tidak berbeda
+# dengan mesin developer Windows yang juga-checkout repo ini.
+* text=auto eol=lf

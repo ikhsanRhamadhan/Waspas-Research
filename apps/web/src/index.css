@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-slate-50 font-sans text-[15px] text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100;
+  }
+
+  /* Angka skor dan nominal harus sejajar vertikal supaya kolom tabel bisa dibandingkan. */
+  table,
+  input[type='number'],
+  input[type='date'] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-950;
+  }
+}
+
+@layer components {
+  .label-section {
+    @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400;
+  }
+
+  .data-row {
+    @apply flex items-baseline justify-between gap-4 border-b border-slate-200 py-2.5 last:border-b-0 dark:border-slate-800;
+  }
+
+  .data-row dt {
+    @apply text-sm text-slate-600 dark:text-slate-400;
+  }
+
+  .data-row dd {
+    @apply text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-50;
+  }
+}
+
+/* Memperkecil efek gerak untuk pengguna yang meminta pengurangan animasi di level sistem. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

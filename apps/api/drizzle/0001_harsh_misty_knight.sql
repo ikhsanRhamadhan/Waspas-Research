@@ -1,0 +1,2 @@
+CREATE TYPE "public"."kunci_kriteria" AS ENUM('penghasilan', 'tanggungan', 'kondisi_rumah');--> statement-breakpoint
+ALTER TABLE "kriteria" ALTER COLUMN "kunci" SET DATA TYPE "public"."kunci_kriteria" USING "kunci"::"public"."kunci_kriteria";
